@@ -1,0 +1,29 @@
+server:
+  port: ${DATA_SERVICE_SERVER_PORT}
+
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    database-platform: ${DATABASE_PLATFORM}
+
+  kafka:
+    bootstrap-servers: ${BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: data-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      enable-auto-commit: true
+      auto-commit-interval: 1000
+      properties:
+        spring.json.trusted.packages: '*'
+
+app:
+  kafka:
+    product-topic: product-topic
+    user-topic: user-topic
+    review-topic: review-topic

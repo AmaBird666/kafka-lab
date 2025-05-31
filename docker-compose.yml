@@ -1,0 +1,83 @@
+version: '3.8'
+name: 'Kafka-lab-2'
+
+services:
+  api-service:
+    container_name: api-service
+    build:
+      context: api-service
+      dockerfile: Dockerfile
+    depends_on:
+      - data-service
+      - kafka
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    networks:
+      - main
+
+  data-service:
+    container_name: data-service
+    build:
+      context: data-service
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+      - kafka
+    env_file:
+      - .env
+    networks:
+      - main
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_db_data:/var/lib/postgresql/data
+      - ./data-service/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./data-service/database/insert_data.sql:/docker-entrypoint-initdb.d/02-insert_data.sql
+    networks:
+      - main
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    hostname: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SYNC_LIMIT: 2
+    networks:
+      - main
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - main
+
+networks:
+  main:
+
+volumes:
+  postgres_db_data:
+  kafka-data:

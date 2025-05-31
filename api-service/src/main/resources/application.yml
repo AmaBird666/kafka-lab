@@ -1,0 +1,18 @@
+server:
+  port: ${API_SERVICE_SERVER_PORT}
+
+spring:
+  kafka:
+    bootstrap-servers: ${BOOTSTRAP_SERVERS}
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+app:
+  url:
+    data-service: ${DATA_SERVICE}
+  kafka:
+    product-topic: product-topic
+    user-topic: user-topic
+    review-topic: review-topic
