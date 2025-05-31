@@ -1,1 +1,1 @@
-Добавлен ключ позиционирования в api-service(producer)
+Добавлен ключ позиционирования в api-service (KafkaProducer)
